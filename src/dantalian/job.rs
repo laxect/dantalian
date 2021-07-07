@@ -1,5 +1,4 @@
-use super::config::Config;
-use super::utils::is_video_file;
+use super::{config::Config, utils::is_video_file};
 use anyhow::{anyhow, Result};
 use std::path::Path;
 use walkdir::{DirEntry, WalkDir};
@@ -39,11 +38,7 @@ impl Job {
         })
     }
 
-    fn check_episode(
-        file_entry: &DirEntry,
-        config: &Config,
-        force: bool,
-    ) -> Result<Option<EpisodeJob>> {
+    fn check_episode(file_entry: &DirEntry, config: &Config, force: bool) -> Result<Option<EpisodeJob>> {
         if !is_video_file(file_entry.path()) {
             // if this file is not video file, skip it.
             return Ok(None);
@@ -59,22 +54,14 @@ impl Job {
         }
         let caps = config.episode_re.captures(file_name);
         let ep: String = match caps.as_ref().and_then(|c| c.name("ep")) {
-            Some(ep_match) => {
-                String::from(ep_match.as_str().parse::<String>()?.trim_start_matches('0'))
-            }
+            Some(ep_match) => String::from(ep_match.as_str().parse::<String>()?.trim_start_matches('0')),
             None => return Ok(None),
         };
-        let sp = caps
-            .and_then(|c| c.name("sp"))
-            .map_or(false, |mat| mat.as_str() != "");
+        let sp = caps.and_then(|c| c.name("sp")).map_or(false, |mat| mat.as_str() != "");
         return Ok(Some(EpisodeJob {
             index: ep,
             is_sp: sp,
-            filename: String::from(
-                nfo_file_path
-                    .to_str()
-                    .ok_or_else(|| anyhow!("invalid nfo file name"))?,
-            ),
+            filename: String::from(nfo_file_path.to_str().ok_or_else(|| anyhow!("invalid nfo file name"))?),
         }));
     }
 

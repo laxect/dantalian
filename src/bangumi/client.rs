@@ -5,22 +5,17 @@ use hyper_tls::HttpsConnector;
 use log::{debug, trace};
 use percent_encoding::{utf8_percent_encode, NON_ALPHANUMERIC};
 use serde::{de::DeserializeOwned, Deserialize};
-use std::fmt;
-use std::time::SystemTime;
+use std::{fmt, time::SystemTime};
 
 pub async fn search_anime(keyword: &str) -> Result<SearchResponse> {
-    let encoded_keyword = utf8_percent_encode(&keyword, NON_ALPHANUMERIC);
-    let ts = SystemTime::now()
-        .duration_since(SystemTime::UNIX_EPOCH)?
-        .as_secs();
+    let encoded_keyword = utf8_percent_encode(keyword, NON_ALPHANUMERIC);
+    let ts = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH)?.as_secs();
     let path = format!(
         "/search/subject/{}?type=2&responseGroup=large&chii_searchDateLine={}",
         encoded_keyword, ts,
     );
     trace!("request url {}", path);
-    let res: SearchResponse = request(&path)
-        .await
-        .with_context(|| "request search anime")?;
+    let res: SearchResponse = request(&path).await.with_context(|| "request search anime")?;
     debug!("obj: {:?}", &res);
     Ok(res)
 }
@@ -86,15 +81,11 @@ impl fmt::Display for EpisodeResponse {
 async fn request<T: DeserializeOwned>(path: &str) -> Result<T> {
     let https = HttpsConnector::new();
     let client = Client::builder().build::<_, hyper::Body>(https);
-    let url: Uri = format!("{}{}", BASE_URL, path)
-        .parse()
-        .with_context(|| "parse url")?;
+    let url: Uri = format!("{}{}", BASE_URL, path).parse().with_context(|| "parse url")?;
     debug!("url = {}", &url);
     let res = client.get(url).await.with_context(|| "get request")?;
     debug!("status: {}", res.status());
-    let buf = hyper::body::to_bytes(res)
-        .await
-        .with_context(|| "read body")?;
+    let buf = hyper::body::to_bytes(res).await.with_context(|| "read body")?;
     let res_obj: T = serde_json::from_slice(&buf).with_context(|| {
         let body = String::from_utf8(buf.to_vec()).unwrap_or_else(|_| "not utf8".to_string());
         format!("get body: {}", body)

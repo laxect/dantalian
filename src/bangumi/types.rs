@@ -98,10 +98,7 @@ impl<'a> fmt::Display for SubjectBaseWithNum<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let prefix = indent_display(f);
         let strings = vec![
-            format!(
-                "{}{:>2} {} / {}",
-                prefix, self.num, self.inner.name, self.inner.name_cn
-            ),
+            format!("{}{:>2} {} / {}", prefix, self.num, self.inner.name, self.inner.name_cn),
             format!("{}   Subject ID: {}", prefix, self.inner.id),
             format!("{}   Air Date: {}", prefix, self.inner.air_date),
             format!("{}   URL: {}", prefix, self.inner.url),

@@ -8,11 +8,7 @@ pub struct Opts {
     pub verbose: bool,
     #[clap(short, long, about = "source folders", required = false)]
     pub source: Vec<PathBuf>,
-    #[clap(
-        long,
-        about = "dir names which you want to force re-generate",
-        required = false
-    )]
+    #[clap(long, about = "dir names which you want to force re-generate", required = false)]
     pub force: Vec<String>,
     #[clap(subcommand)]
     pub subcmd: Option<SubCmd>,

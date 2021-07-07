@@ -1,5 +1,7 @@
-use crate::bangumi::{BgmAnime, EpisodeType};
-use crate::nfogen::{Actor, Episode, TVShow};
+use crate::{
+    bangumi::{BgmAnime, EpisodeType},
+    nfogen::{Actor, Episode, TVShow},
+};
 use std::rc::Rc;
 
 // AnimeData store data for generator nfo files.

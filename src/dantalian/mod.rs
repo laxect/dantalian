@@ -1,14 +1,13 @@
-use crate::bangumi::{get_anime_data, search_anime, SubjectBaseWithNum};
-use crate::nfogen::{Generator, TVSHOW_NFO_NAME};
-use crate::{error, info};
+use crate::{
+    bangumi::{get_anime_data, search_anime, SubjectBaseWithNum},
+    error, info,
+    nfogen::{Generator, TVSHOW_NFO_NAME},
+};
 use anyhow::{anyhow, Context, Result};
 use config::Config;
 use data::AnimeData;
 use job::Job;
-use std::collections::HashSet;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use std::{collections::HashSet, fs::File, io::Write, path::Path};
 use utils::path_str;
 use walkdir::WalkDir;
 
@@ -40,9 +39,7 @@ async fn handle_dir(path: &Path, force: bool) -> Result<()> {
         info!(ind: 3, "No file should be generate, skip.");
         return Ok(());
     }
-    let bgm_data = get_anime_data(job.subject_id)
-        .await
-        .with_context(|| "get_anime_data")?;
+    let bgm_data = get_anime_data(job.subject_id).await.with_context(|| "get_anime_data")?;
     info!(ind: 3,
         "Fetch anime data for: [{}] {} / {}",
         &bgm_data.subject.id,
@@ -78,14 +75,12 @@ pub async fn generate_config(keywords: Vec<String>, path: &Path) -> Result<()> {
         return Ok(());
     }
     for (ind, item) in res.list.iter().enumerate() {
-        let item_with_num = SubjectBaseWithNum {
-            num: ind,
-            inner: item,
-        };
+        let item_with_num = SubjectBaseWithNum { num: ind, inner: item };
         info!("{:>1}", item_with_num);
     }
     let mut buf = String::new();
-    println!("\n  choose the one is right:");
+    print!("\n  choose the one is right:");
+    std::io::stdout().flush()?;
     std::io::stdin().read_line(&mut buf)?;
     if let Ok(num) = buf.trim().parse::<usize>() {
         if let Some(item) = res.list.get(num) {

@@ -1,12 +1,12 @@
-use crate::bangumi::{get_subject_info, search_anime};
-use crate::info;
+use crate::{
+    bangumi::{get_subject_info, search_anime},
+    info,
+};
 use anyhow::{anyhow, bail, Result};
 use once_cell::sync::Lazy;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use std::{fs::File, io::Write, path::Path};
 
 #[derive(Deserialize, Serialize, Debug)]
 struct ConfigFile {
@@ -93,8 +93,7 @@ impl Config {
     }
 }
 
-static DEFAULT_DIR_RE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"^(?P<name>.+?)(?P<tags> (\[[^\s]+\])+)?$").unwrap());
+static DEFAULT_DIR_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(?P<name>.+?)(?P<tags> (\[[^\s]+\])+)?$").unwrap());
 
 fn cap_anime_name(dir_name: &str) -> Option<String> {
     DEFAULT_DIR_RE

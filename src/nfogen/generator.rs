@@ -19,19 +19,13 @@ impl<'a> Generator<'a> {
     }
 
     pub fn gen_tvshow_nfo(&self, show: &TVShow) -> Result<String> {
-        let rendered = self
-            .tt
-            .render("tvshow", show)
-            .with_context(|| "render tvshow")?;
+        let rendered = self.tt.render("tvshow", show).with_context(|| "render tvshow")?;
         debug!("generated tvshow nfo file:\n{}", &rendered);
         Ok(rendered)
     }
 
     pub fn gen_episode_nfo(&self, episode: &Episode) -> Result<String> {
-        let rendered = self
-            .tt
-            .render("episode", episode)
-            .with_context(|| "render episode")?;
+        let rendered = self.tt.render("episode", episode).with_context(|| "render episode")?;
         debug!("generated episode nfo file:\n{}", &rendered);
         Ok(rendered)
     }

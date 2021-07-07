@@ -1,7 +1,11 @@
 use anyhow::Result;
 use clap::Clap;
-use dantalian::dantalian::{dantalian, generate_config};
-use dantalian::{bangumi, info, logger::Logger};
+use dantalian::{
+    bangumi,
+    dantalian::{dantalian, generate_config},
+    info,
+    logger::Logger,
+};
 use log::set_logger;
 use options::{BgmCmd, BgmSubCmd, GenConfigCmd, Opts, SubCmd};
 use std::collections::HashSet;
