@@ -4,12 +4,15 @@ use crate::{
     nfogen::{Generator, TVSHOW_NFO_NAME},
 };
 use anyhow::{anyhow, Context, Result};
+use colored::Colorize;
 use config::Config;
 use data::AnimeData;
 use job::Job;
 use std::{collections::HashSet, fs::File, io::Write, path::Path};
 use utils::path_str;
 use walkdir::WalkDir;
+
+use self::utils::is_video_file;
 
 mod config;
 mod data;
@@ -67,6 +70,7 @@ async fn handle_dir(path: &Path, force: bool) -> Result<()> {
     Ok(())
 }
 
+const PLACEHOLDER: &str = "(?P<sp>.*)";
 pub async fn generate_config(keywords: Vec<String>, path: &Path) -> Result<()> {
     let keyword = keywords.concat();
     let res = search_anime(&keyword).await?;
@@ -79,15 +83,43 @@ pub async fn generate_config(keywords: Vec<String>, path: &Path) -> Result<()> {
         info!("{:>1}", item_with_num);
     }
     let mut buf = String::new();
-    print!("\n  choose the one is right:");
+    print!("\n  choose the one is right: ");
     std::io::stdout().flush()?;
     std::io::stdin().read_line(&mut buf)?;
     if let Ok(num) = buf.trim().parse::<usize>() {
         if let Some(item) = res.list.get(num) {
-            let name_qry = format!("{}|{}", item.name, item.name_cn);
+            let filenames_str = gather_media_filename(path)?;
+            let filenames: Vec<&str> = filenames_str.iter().map(AsRef::as_ref).collect();
+            let re = if filenames.is_empty() {
+                let name_qry = format!("{}|{}", item.name, item.name_cn);
+                config::default_ep_regex(&name_qry)?
+            } else if filenames.len() >= 2 {
+                regex_gather::gather_regex(&filenames, PLACEHOLDER, true)?
+            } else {
+                let patterns = regex_gather::guess_pattern_with_escape(&filenames[0], PLACEHOLDER, regex::escape)?;
+                for (ind, item) in patterns.iter().enumerate() {
+                    println!(
+                        "  {:>2} - {}\n     - {}{}{}\n",
+                        ind,
+                        item.pattern,
+                        item.preview_left,
+                        item.highlight.bold().green(),
+                        item.preview_right
+                    );
+                }
+                print!("\n  choose the regex is right: ");
+                std::io::stdout().flush()?;
+                buf.clear();
+                std::io::stdin().read_line(&mut buf)?;
+                if let Some(choose) = patterns.get(buf.trim().parse::<usize>()?) {
+                    regex::Regex::new(&choose.pattern)?
+                } else {
+                    return Err(anyhow::anyhow!("not a valid number"));
+                }
+            };
             let config = Config {
                 subject_id: item.id,
-                episode_re: config::default_ep_regex(&name_qry)?,
+                episode_re: re,
             };
             config.save_to_dir(path)?;
             return Ok(());
@@ -95,4 +127,17 @@ pub async fn generate_config(keywords: Vec<String>, path: &Path) -> Result<()> {
     }
     error!(ind: 2, "not a valid number!");
     Ok(())
+}
+
+pub fn gather_media_filename(path: &Path) -> Result<Vec<String>> {
+    let mut res = Vec::new();
+    for e in WalkDir::new(path).min_depth(1).max_depth(1) {
+        let entry = e?;
+        if entry.file_type().is_file() {
+            if is_video_file(entry.path()) {
+                res.push(entry.file_name().to_string_lossy().into_owned());
+            }
+        }
+    }
+    Ok(res)
 }
