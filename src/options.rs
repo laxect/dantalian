@@ -17,44 +17,7 @@ pub struct Opts {
 #[derive(Clap)]
 pub enum SubCmd {
     #[clap()]
-    Bgm(BgmCmd),
-    #[clap()]
     GenConfig(GenConfigCmd),
-}
-
-#[derive(Clap)]
-#[clap(about = "cli tools for bangumi apis")]
-pub struct BgmCmd {
-    #[clap(subcommand)]
-    pub subcmd: BgmSubCmd,
-}
-
-#[derive(Clap)]
-pub enum BgmSubCmd {
-    Search(BgmSearchOpt),
-    Get(BgmGetSubjectOpt),
-    GetEp(BgmGetSubjectEpsOpt),
-}
-
-#[derive(Clap)]
-#[clap(about = "search keyword")]
-pub struct BgmSearchOpt {
-    #[clap(about = "search keyword")]
-    pub keyword: Vec<String>,
-}
-
-#[derive(Clap)]
-#[clap(about = "get subject")]
-pub struct BgmGetSubjectOpt {
-    #[clap(about = "subject id")]
-    pub id: u32,
-}
-
-#[derive(Clap)]
-#[clap(about = "get subject episodes")]
-pub struct BgmGetSubjectEpsOpt {
-    #[clap(about = "subject id")]
-    pub id: u32,
 }
 
 #[derive(Clap)]
