@@ -133,10 +133,8 @@ pub fn gather_media_filename(path: &Path) -> Result<Vec<String>> {
     let mut res = Vec::new();
     for e in WalkDir::new(path).min_depth(1).max_depth(1) {
         let entry = e?;
-        if entry.file_type().is_file() {
-            if is_video_file(entry.path()) {
-                res.push(entry.file_name().to_string_lossy().into_owned());
-            }
+        if entry.file_type().is_file() && is_video_file(entry.path()) {
+            res.push(entry.file_name().to_string_lossy().into_owned());
         }
     }
     Ok(res)
