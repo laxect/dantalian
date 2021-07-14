@@ -10,6 +10,8 @@ pub struct Opts {
     pub source: Vec<PathBuf>,
     #[clap(long, about = "dir names which you want to force re-generate", required = false)]
     pub force: Vec<String>,
+    #[clap(long, about = "force re-generate all anime")]
+    pub force_all: bool,
     #[clap(subcommand)]
     pub subcmd: Option<SubCmd>,
 }
