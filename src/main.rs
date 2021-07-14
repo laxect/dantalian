@@ -6,7 +6,7 @@ use dantalian::{
 };
 use log::set_logger;
 use options::{GenConfigCmd, Opts, SubCmd};
-use std::collections::HashSet;
+use std::{collections::HashSet, iter::FromIterator};
 
 mod options;
 
@@ -19,12 +19,19 @@ async fn main() -> Result<()> {
     }
     match opts.subcmd {
         None => {
-            let mut force: HashSet<String> = HashSet::new();
-            for f in opts.force {
-                force.insert(f);
-            }
+            let force: HashSet<String> = HashSet::from_iter(opts.force);
+            let force_all = opts.force_all;
+            let is_force = |path| {
+                if force_all {
+                    return true;
+                }
+                if force.contains(&path) {
+                    return true;
+                }
+                return false;
+            };
             for source in opts.source {
-                dantalian(&source, &force, opts.force_all).await?;
+                dantalian(&source, is_force).await?;
             }
             Ok(())
         }

@@ -8,8 +8,7 @@ use colored::Colorize;
 use config::Config;
 use data::AnimeData;
 use job::Job;
-use std::{collections::HashSet, fs::File, io::Write, path::Path};
-use utils::path_str;
+use std::{fs::File, io::Write, path::Path};
 use walkdir::WalkDir;
 
 use self::utils::is_video_file;
@@ -19,14 +18,14 @@ mod data;
 mod job;
 mod utils;
 
-pub async fn dantalian(source: &Path, forces: &HashSet<String>, force_all: bool) -> Result<()> {
+pub async fn dantalian<F: FnMut(String) -> bool>(source: &Path, mut is_force: F) -> Result<()> {
     info!("Run dantalian for {}", source.to_string_lossy());
     for e in WalkDir::new(source).min_depth(1).max_depth(1) {
         let entry = e?;
         if entry.file_type().is_dir() {
-            let path = path_str(entry.path())?;
+            let path = entry.path().to_string_lossy().to_string();
             info!(ind: 1, "Check {} ...", path);
-            match handle_dir(entry.path(), force_all || forces.contains(path)).await {
+            match handle_dir(entry.path(), is_force(path)).await {
                 Ok(_) => info!(ind: 2, "Completed!"),
                 Err(e) => error!(ind: 2, "Failed: {}", e),
             };
