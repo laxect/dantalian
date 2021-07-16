@@ -27,6 +27,6 @@ pub enum SubCmd {
 pub struct GenConfigCmd {
     #[clap(about = "search keyword")]
     pub keyword: Vec<String>,
-    #[clap(short, long, about = "anime dir path")]
+    #[clap(short, long, about = "anime dir path", value_hint=ValueHint::DirPath)]
     pub path: PathBuf,
 }
